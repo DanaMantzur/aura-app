@@ -11,7 +11,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
             background-color: #0a111f !important; 
-            /* נתיב מעודכן לרקע */
             background-image: url('Minigames/aura_squad/background.png'); 
             background-size: cover;
             background-position: center;
@@ -28,7 +27,6 @@
             font-size: 3.5rem;
             font-weight: bold;
             text-shadow: 0 4px 15px rgba(0,0,0,0.6);
-            letter-spacing: 1px;
             font-family: 'Arial', sans-serif;
         }
 
@@ -37,7 +35,7 @@
             flex-direction: row;
             justify-content: center;
             align-items: center;
-            gap: 30px;
+            gap: 40px;
             margin-top: 80px;
             width: 100%;
             padding: 20px;
@@ -47,12 +45,15 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.3s ease;
+            /* אפקט הציפה והגדילה שביקשת */
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             width: 180px;
+            cursor: pointer;
         }
 
+        /* כאן קורה הקסם של ההובר */
         .char-card:hover {
-            transform: translateY(-15px);
+            transform: translateY(-20px) scale(1.1); /* צף מעלה וגדל ב-10% */
         }
 
         .bubble {
@@ -76,28 +77,34 @@
             object-fit: contain;
         }
 
-        /* אפקט הילה בהובר */
+        /* שינוי הגוון לכתום חלומי בהובר */
         .char-card:hover .bubble {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 50px rgba(255, 255, 255, 0.2);
+            background: rgba(255, 165, 0, 0.15); /* רקע כתום שקוף עדין */
+            border-color: rgba(255, 140, 0, 0.6); /* מסגרת כתומה */
+            box-shadow: 0 0 40px rgba(255, 140, 0, 0.4), inset 0 0 20px rgba(255, 140, 0, 0.2); /* הילה כתומה פנימית וחיצונית */
         }
 
         .char-info {
             text-align: center;
             margin-top: 20px;
+            transition: all 0.4s ease;
+        }
+
+        /* שינוי צבע הטקסט לכתום חם בהובר */
+        .char-card:hover .char-info h3 {
+            color: #ffcc33;
+            text-shadow: 0 0 10px rgba(255, 204, 51, 0.5);
         }
 
         .char-info h3 { 
             margin: 0; 
             font-size: 1.5rem;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .char-info p { 
             margin: 5px 0 0; 
-            opacity: 0.9; 
+            opacity: 0.8; 
             font-size: 1.1rem;
             color: #d1d1d1;
         }
@@ -108,17 +115,10 @@
     <h1 class="main-title">Aura Squad</h1>
     
     <div class="characters-container">
-        
-        <!-- ענן -->
+        <!-- פנדה -->
         <div class="char-card">
-            <div class="bubble"><img src="Minigames/aura_squad/cloud.png" alt="ענן"></div>
-            <div class="char-info"><h3>ענן</h3><p>חופש</p></div>
-        </div>
-
-        <!-- מדוזה -->
-        <div class="char-card">
-            <div class="bubble"><img src="Minigames/aura_squad/jellyfish.png" alt="מדוזה"></div>
-            <div class="char-info"><h3>מדוזה</h3><p>זרימה</p></div>
+            <div class="bubble"><img src="Minigames/aura_squad/panda.png" alt="פנדה"></div>
+            <div class="char-info"><h3>פנדה</h3><p>נוכחות</p></div>
         </div>
 
         <!-- חלוק נחל -->
@@ -127,12 +127,17 @@
             <div class="char-info"><h3>חלוק נחל</h3><p>שקט</p></div>
         </div>
 
-        <!-- פנדה -->
+        <!-- מדוזה -->
         <div class="char-card">
-            <div class="bubble"><img src="Minigames/aura_squad/panda.png" alt="פנדה"></div>
-            <div class="char-info"><h3>פנדה</h3><p>נוכחות</p></div>
+            <div class="bubble"><img src="Minigames/aura_squad/jellyfish.png" alt="מדוזה"></div>
+            <div class="char-info"><h3>מדוזה</h3><p>זרימה</p></div>
         </div>
 
+        <!-- ענן -->
+        <div class="char-card">
+            <div class="bubble"><img src="Minigames/aura_squad/cloud.png" alt="ענן"></div>
+            <div class="char-info"><h3>ענן</h3><p>חופש</p></div>
+        </div>
     </div>
 
 </body>
