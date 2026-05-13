@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>נשימה עם Pebble</title>
+    <link rel="stylesheet" href="breathing.css">
+</head>
+<body>
+
+    <div class="game-container">
+        <img src="pebble.jpg" class="character-mentor" alt="Pebble Mentor">
+
+        <div class="breathing-area">
+            <div class="breathing-circle" id="circle"></div>
+            <h2 id="instruction-text"></h2> 
+        </div>
+    </div>
+
+    <!-- טקסטים מוסתרים כדי למנוע בעיות עברית ב-JS -->
+    <div style="display: none;">
+        <span id="txt-inhale">הכניסו אוויר רגוע...</span>
+        <span id="txt-exhale">הוציאו את כל המתח...</span>
+    </div>
+
+    <script src="breathing.js"></script>
+
+</body>
+</html>

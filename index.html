@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Squad</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            background-color: #0a111f !important; 
+            /* נתיב מעודכן לרקע */
+            background-image: url('Minigames/aura_squad/background.png'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .main-title {
+            margin-top: 50px;
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            letter-spacing: 1px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .characters-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-top: 80px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .char-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+            width: 180px;
+        }
+
+        .char-card:hover {
+            transform: translateY(-15px);
+        }
+
+        .bubble {
+            width: 160px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .bubble img {
+            height: 130px; 
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* אפקט הילה בהובר */
+        .char-card:hover .bubble {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.2);
+        }
+
+        .char-info {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .char-info h3 { 
+            margin: 0; 
+            font-size: 1.5rem;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .char-info p { 
+            margin: 5px 0 0; 
+            opacity: 0.9; 
+            font-size: 1.1rem;
+            color: #d1d1d1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="main-title">Aura Squad</h1>
+    
+    <div class="characters-container">
+        
+        <!-- ענן -->
+        <div class="char-card">
+            <div class="bubble"><img src="Minigames/aura_squad/cloud.png" alt="ענן"></div>
+            <div class="char-info"><h3>ענן</h3><p>חופש</p></div>
+        </div>
+
+        <!-- מדוזה -->
+        <div class="char-card">
+            <div class="bubble"><img src="Minigames/aura_squad/jellyfish.png" alt="מדוזה"></div>
+            <div class="char-info"><h3>מדוזה</h3><p>זרימה</p></div>
+        </div>
+
+        <!-- חלוק נחל -->
+        <div class="char-card">
+            <div class="bubble"><img src="Minigames/aura_squad/pebble.png" alt="חלוק נחל"></div>
+            <div class="char-info"><h3>חלוק נחל</h3><p>שקט</p></div>
+        </div>
+
+        <!-- פנדה -->
+        <div class="char-card">
+            <div class="bubble"><img src="Minigames/aura_squad/panda.png" alt="פנדה"></div>
+            <div class="char-info"><h3>פנדה</h3><p>נוכחות</p></div>
+        </div>
+
+    </div>
+
+</body>
+</html>
