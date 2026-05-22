@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aura Squad - מרחב ויסות ורוגע</title>
+    <style>
+        /* =========================================
+           1. פלטת צבעים, משתנים ועיצוב בסיסי
+           ========================================= */
+        :root {
+            --deep-blue: #0f1b29;
+            --soft-peach: #fdd5bd;
+            --pastel-purple: #bc84ee;
+            --ice-blue: #cbe3f0;
+            --aura-orange: #ff9f43;
+            --aura-orange-glow: rgba(255, 159, 67, 0.4);
+            
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1a2a40 0%, var(--deep-blue) 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none; 
+        }
+
+        /* =========================================
+           2. מעטפת המסכים
+           ========================================= */
+        .screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            max-width: 480px;
+            position: absolute;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeInScreen 0.6s ease forwards;
+        }
+
+        @keyframes fadeInScreen {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =========================================
+           3. מסך Splash ומבוא
+           ========================================= */
+        .splash-logo {
+            width: 180px;
+            height: auto;
+            opacity: 0;
+            filter: drop-shadow(0 0 20px rgba(253, 213, 189, 0.3));
+            animation: logoGrowAndFade 4s ease-in-out forwards;
+        }
+
+        @keyframes logoGrowAndFade {
+            0% { opacity: 0; transform: scale(0.88); }
+            25% { opacity: 1; transform: scale(1.02); }
+            75% { opacity: 1; transform: scale(1.06); }
+            100% { opacity: 0; transform: scale(1.15); }
+        }
+
+        .intro-image-container {
+            width: 100%;
+            height: 350px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .intro-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+        }
+
+        .headline {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--soft-peach);
+            margin-bottom: 25px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .btn-glass {
+            background: linear-gradient(135deg, rgba(188, 132, 238, 0.4) 0%, rgba(188, 132, 238, 0.1) 100%);
+            border: 1px solid rgba(188, 132, 238, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #fff;
+            font-weight: 700;
+            font-size: 18px;
+            padding: 16px 32px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+            width: 90%;
+            letter-spacing: 1px;
+        }
+
+        .btn-glass:active {
+            transform: scale(0.95);
+        }
+
+        /* =========================================
+           4. מסך בחירת דמויות
+           ========================================= */
+        .selection-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .char-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px 15px;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            animation: floatCard 4s ease-in-out infinite;
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .char-card.selected {
+            border-color: var(--aura-orange);
+            background: rgba(255, 159, 67, 0.2);
+            box-shadow: 0 0 30px rgba(255, 159, 67, 0.5);
+            transform: scale(1.02);
+        }
+
+        .char-card img {
+            width: 85px;
+            height: 85px;
+            object-fit: contain;
+            margin-bottom: 12px;
+        }
+
+        .char-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ice-blue);
+        }
+
+        /* =========================================
+           5. דאשבורד ומשחקים (הגדרות משותפות)
+           ========================================= */
+        .glass-dropdown {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(15, 27, 41, 0.85);
+            color: var(--soft-peach);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            backdrop-filter: blur(15px);
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fdd5bd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: left 15px center;
+            margin-bottom: 25px;
+        }
+
+        .game-runtime-zone {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .top-bar-game {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none; /* מאפשר לחיצה לעבור דרך האזור הריק */
+        }
+
+        /* התיקון לניקוד - רקע כהה יותר, שכבה נמוכה וביטול מגע */
+        .game-badge {
+            background: rgba(15, 27, 41, 0.6);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            font-weight: bold;
+            font-size: 13px;
+            color: var(--soft-peach);
+            backdrop-filter: blur(5px);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* =========================================
+           6. משחק נשימה
+           ========================================= */
+        .breathing-game-container {
+            width: 100%; height: 100%;
+            border: 2px solid var(--aura-orange);
+            border-radius: 24px;
+            box-shadow: 0 0 25px var(--aura-orange-glow);
+            background: rgba(255, 255, 255, 0.03);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 20px;
+        }
+        
+        .instruction-text-display { font-size: 22px; font-weight: 700; height: 30px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+        .breathing-playground { position: relative; width: 100%; height: 240px; display: flex; justify-content: center; align-items: center; }
+        
+        .breathing-circle { 
+            width: 120px; height: 120px; 
+            background: radial-gradient(circle, rgba(188, 132, 238, 0.6) 0%, rgba(203, 227, 240, 0.2) 100%); 
+            border: 2px solid var(--ice-blue); border-radius: 50%; 
+            transition: transform 8s ease-in-out, background 4s ease-in-out; 
+        }
+        
+        .breathing-circle.inhale { 
+            transform: scale(1.8); 
+            background: radial-gradient(circle, rgba(253, 213, 189, 0.7) 0%, rgba(188, 132, 238, 0.3) 100%); 
+            border-color: var(--soft-peach); 
+            box-shadow: 0 0 40px rgba(253, 213, 189, 0.5); 
+            transition: transform 4s ease-in-out, background 4s ease-in-out; 
+        }
+        
+        .character-side-mentor { 
+            position: absolute; right: 15px; width: 80px; height: 80px; object-fit: contain; transform: scaleX(-1); 
+        }
+
+        /* =========================================
+           7. מבוך ריכוז
+           ========================================= */
+        #maze-container { 
+            width: 100%; height: 380px; 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 2px solid var(--ice-blue); border-radius: 20px; 
+            position: relative; overflow: hidden; 
+            box-shadow: 0 0 25px rgba(203, 227, 240, 0.2); 
+        }
+        
+        #maze-canvas { width: 100%; height: 100%; touch-action: none; }
+        
+        /* התיקון לדמות - תמיד מעל הכל (z-index: 100) */
+        .maze-avatar { 
+            position: absolute; width: 45px; height: 45px; object-fit: contain;
+            pointer-events: none; z-index: 100; 
+            transition: transform 0.1s linear; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); 
+        }
+
+        /* =========================================
+           8. פאזל התאמה
+           ========================================= */
+        #puzzle-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--pastel-purple);
+            border-radius: 12px;
+            display: grid;
+            gap: 1px;
+            padding: 5px;
+            margin-top: 50px;
+        }
+        
+        .puzzle-piece {
+            background-color: var(--glass-bg);
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            background-repeat: no-repeat;
+            cursor: pointer;
+            transition: transform 0.2s, border 0.2s;
+        }
+
+        .puzzle-piece.selected {
+            border: 3px solid var(--aura-orange);
+            transform: scale(0.92);
+            z-index: 5;
+            box-shadow: 0 0 15px var(--aura-orange-glow);
+        }
+
+        .puzzle-reference-box {
+            width: 70px;
+            height: 70px;
+            border: 2px solid var(--ice-blue);
+            border-radius: 8px;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            pointer-events: auto;
+        }
+
+        .reference-label {
+            font-size: 10px;
+            color: var(--ice-blue);
+            margin-top: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="screen-splash" class="screen active">
+        <img src="logo.png" class="splash-logo" onerror="this.style.display='none'; this.after('AURA SQUAD')">
+    </div>
+
+    <div id="screen-intro" class="screen">
+        <div class="intro-image-container">
+            <img src="all-images.png" onerror="this.style.display='none'">
+        </div>
+        <h1 class="headline">לבחירת הבובה הדיגיטלית לחץ כאן</h1>
+        <button class="btn-glass" onclick="navigateTo('screen-selection')">המשך</button>
+    </div>
+
+    <div id="screen-selection" class="screen">
+        <h1 class="headline">מי ילווה אותך היום?</h1>
+        <div class="selection-grid">
+            <div class="char-card" data-char="pebble" onclick="selectChar('pebble')">
+                <img src="pebble.png" onerror="this.style.display='none'"><h3>חלוק נחל</h3>
+            </div>
+            <div class="char-card" data-char="jellyfish" onclick="selectChar('jellyfish')">
+                <img src="jellyfish.png" onerror="this.style.display='none'"><h3>המדוזה</h3>
+            </div>
+            <div class="char-card" data-char="cloud" onclick="selectChar('cloud')">
+                <img src="cloud.png" onerror="this.style.display='none'"><h3>הענן</h3>
+            </div>
+            <div class="char-card" data-char="panda" onclick="selectChar('panda')">
+                <img src="panda.png" onerror="this.style.display='none'"><h3>הפנדה</h3>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-dashboard" class="screen">
+        <select id="game-dropdown" class="glass-dropdown" onchange="loadGame(this.value)">
+            <option value="none" selected disabled>בחרי פעילות מרגיעה...</option>
+            <option value="breathe">תרגיל נשימה</option>
+            <option value="maze">מבוך ריכוז</option>
+            <option value="puzzle">פאזל התאמה</option>
+        </select>
+        
+        <div class="game-runtime-zone" id="game-zone">
+            <p style="color: rgba(255, 255, 255, 0.4); font-size: 18px; margin: auto;">הפעילות שבחרת תופיע כאן</p>
+        </div>
+    </div>
+
+    <script>
+        // ניהול מצב גלובלי
+        let appState = {
+            selectedCharacter: 'pebble',
+            breathingInterval: null,
+            mazeScore: 0,
+            mazeLevel: 0,
+            puzzleLevel: 0
+        };
+
+        // ניווט בין מסכים
+        function navigateTo(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // טיימר אוטומטי למסך פתיחה
+        setTimeout(() => navigateTo('screen-intro'), 4000);
+
+        // פונקציית בחירת דמות
+        function selectChar(char) {
+            appState.selectedCharacter = char;
+            document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector(`[data-char="${char}"]`).classList.add('selected');
+            setTimeout(() => navigateTo('screen-dashboard'), 500);
+        }
+
+        // טעינת משחקים מתוך ה-Dropdown
+        function loadGame(game) {
+            // ניקוי טיימרים קודמים
+            if (appState.breathingInterval) {
+                clearInterval(appState.breathingInterval);
+                appState.breathingInterval = null;
+            }
+            
+            const zone = document.getElementById('game-zone');
+            zone.innerHTML = '';
+
+            // --- 1. משחק נשימה ---
+            if (game === 'breathe') {
+                zone.innerHTML = `
+                    <div class="breathing-game-container">
+                        <h2 class="instruction-text-display" id="b-text">לקחת אוויר...</h2>
+                        <div class="breathing-playground">
+                            <div class="breathing-circle" id="b-circle"></div>
+                            <img src="${appState.selectedCharacter}-side.png" class="character-side-mentor" onerror="this.src='${appState.selectedCharacter}.png'">
+                        </div>
+                    </div>`;
+                
+                const txt = document.getElementById('b-text');
+                const circ = document.getElementById('b-circle');
+                
+                function runBreathing() {
+                    // שלב שאיפה: 4 שניות
+                    txt.innerText = "לקחת אוויר...";
+                    circ.classList.add('inhale');
+                    
+                    setTimeout(() => {
+                        // שלב נשיפה: 8 שניות
+                        txt.innerText = "ולשחרר...";
+                        circ.classList.remove('inhale');
+                    }, 4000);
+                }
+
+                runBreathing(); // הרצה ראשונה
+                appState.breathingInterval = setInterval(runBreathing, 12000); // מחזור כולל של 12 שניות
+            }
+
+            // --- 2. מבוך ריכוז ---
+            else if (game === 'maze') {
+                appState.mazeScore = 0; 
+                appState.mazeLevel = 0;
+                zone.innerHTML = `
+                    <div id="maze-container">
+                        <div class="top-bar-game">
+                            <div class="game-badge">שלב <span id="m-lvl">1</span>/3</div>
+                            <div class="game-badge">ניקוד: <span id="m-scr">0</span></div>
+                        </div>
+                        <canvas id="maze-canvas"></canvas>
+                        <img id="m-player" src="${appState.selectedCharacter}.png" class="maze-avatar">
+                    </div>
+                    <p style="color:var(--ice-blue); font-size:16px; margin-top:10px; font-weight:bold;">הוליכו את הדמות ואספו פירות!</p>`;
+                
+                initMaze();
+            }
+
+            // --- 3. פאזל התאמה ---
+            else if (game === 'puzzle') {
+                appState.puzzleLevel = 0;
+                zone.innerHTML = `
+                    <div class="top-bar-game">
+                        <div class="game-badge">שלב <span id="p-lvl">1</span>/3</div>
+                        <div style="display:flex; flex-direction:column; align-items:center; pointer-events:auto;">
+                            <div id="p-ref" class="puzzle-reference-box"></div>
+                            <span class="reference-label">המטרה</span>
+                        </div>
+                    </div>
+                    <div id="puzzle-container"></div>
+                    <p style="color:var(--ice-blue); font-size:16px; margin-top:10px; font-weight:bold;">געו בשני חלקים כדי להחליף ביניהם</p>`;
+                
+                initPuzzle();
+            }
+        }
+
+        // =========================================
+        // לוגיקת פאזל התאמה (Swap)
+        // =========================================
+        function initPuzzle() {
+            const container = document.getElementById('puzzle-container');
+            const levelTxt = document.getElementById('p-lvl');
+            const refBox = document.getElementById('p-ref');
+            
+            // התמונה שנמשכת לפי הדמות
+            const bgImg = `${appState.selectedCharacter}-bg.png`;
+            
+            // רמות קושי: 4x4 (16), 6x6 (36), 8x8 (64)
+            const sizes = [4, 6, 8];
+            let selected = null;
+
+            function startLevel(idx) {
+                container.innerHTML = '';
+                levelTxt.innerText = idx + 1;
+                refBox.style.backgroundImage = `url(${bgImg})`;
+                
+                const n = sizes[idx];
+                const total = n * n;
+                container.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+                
+                let piecesData = [];
+                for (let i = 0; i < total; i++) {
+                    piecesData.push({
+                        id: i,
+                        x: (i % n) / (n - 1) * 100,
+                        y: Math.floor(i / n) / (n - 1) * 100
+                    });
+                }
+
+                // ערבוב החלקים בצורה אקראית
+                let shuffled = [...piecesData].sort(() => Math.random() - 0.5);
+
+                shuffled.forEach((data, i) => {
+                    const piece = document.createElement('div');
+                    piece.classList.add('puzzle-piece');
+                    piece.style.backgroundImage = `url(${bgImg})`;
+                    piece.style.backgroundSize = `${n * 100}% ${n * 100}%`;
+                    piece.style.backgroundPosition = `${data.x}% ${data.y}%`;
+                    
+                    // שמירת המזהה המקורי (לבדוק ניצחון)
+                    piece.dataset.correctId = data.id;
+                    
+                    // גיבוי צבעוני אם התמונה חסרה
+                    piece.style.backgroundColor = `hsl(${(data.id * 15) % 360}, 70%, 60%)`;
+                    
+                    piece.onclick = () => {
+                        if (!selected) {
+                            selected = piece;
+                            piece.classList.add('selected');
+                        } else {
+                            // ביצוע ההחלפה (Swap)
+                            const sPos = selected.style.backgroundPosition;
+                            const sId = selected.dataset.correctId;
+                            const sColor = selected.style.backgroundColor;
+                            
+                            selected.style.backgroundPosition = piece.style.backgroundPosition;
+                            selected.dataset.correctId = piece.dataset.correctId;
+                            selected.style.backgroundColor = piece.style.backgroundColor;
+                            
+                            piece.style.backgroundPosition = sPos;
+                            piece.dataset.correctId = sId;
+                            piece.style.backgroundColor = sColor;
+                            
+                            selected.classList.remove('selected');
+                            selected = null;
+                            
+                            // בדיקת ניצחון אחרי כל מהלך
+                            checkWin();
+                        }
+                    };
+                    container.appendChild(piece);
+                });
+            }
+
+            function checkWin() {
+                const pieces = document.querySelectorAll('.puzzle-piece');
+                let win = true;
+                pieces.forEach((p, i) => {
+                    if (parseInt(p.dataset.correctId) !== i) win = false;
+                });
+
+                if (win) {
+                    setTimeout(() => {
+                        if (appState.puzzleLevel < 2) {
+                            alert("כל הכבוד! הצלחת להרכיב את התמונה, עוברים לשלב הבא.");
+                            appState.puzzleLevel++;
+                            startLevel(appState.puzzleLevel);
+                        } else {
+                            alert("אלופה! סיימת את השלב הקשה ביותר של הפאזל!");
+                        }
+                    }, 400);
+                }
+            }
+
+            // הפעלת השלב הראשון
+            startLevel(0);
+        }
+
+        // =========================================
+        // לוגיקת מבוך ריכוז
+        // =========================================
+        function initMaze() {
+            const canvas = document.getElementById('maze-canvas');
+            const ctx = canvas.getContext('2d');
+            const player = document.getElementById('m-player');
+            const container = document.getElementById('maze-container');
+            
+            canvas.width = container.clientWidth; 
+            canvas.height = container.clientHeight;
+
+            // תמונת פרי השטן
+            const fruitImg = new Image();
+            fruitImg.src = 'devil-fruit.png';
+
+            // 3 רמות קושי של מפות
+            const maps = [
+                // שלב 1: מרווח
+                [[0,1,1,1,1],[0,0,2,0,1],[1,1,1,0,1],[1,2,0,0,0],[1,1,1,1,3]],
+                // שלב 2: בינוני
+                [[0,0,1,1,1,1,1],[1,0,0,2,1,0,1],[1,1,1,0,1,0,1],[1,2,0,0,0,0,1],[1,0,1,1,1,2,1],[1,0,0,0,1,0,3]],
+                // שלב 3: צפוף
+                [[0,1,1,1,1,1,1,1,1],[0,0,0,0,2,0,0,0,1],[1,1,1,1,1,0,1,1,1],[1,2,0,0,0,0,1,2,1],[1,0,1,1,1,1,1,0,1],[1,0,0,2,0,0,0,0,0],[1,1,1,1,1,1,1,1,3]]
+            ];
+
+            let curMap, rows, cols, cw, ch, isDragging = false;
+
+            function startMLevel(idx) {
+                curMap = JSON.parse(JSON.stringify(maps[idx]));
+                rows = curMap.length; 
+                cols = curMap[0].length;
+                cw = canvas.width / cols; 
+                ch = canvas.height / rows;
+                
+                document.getElementById('m-lvl').innerText = idx + 1;
+                drawM();
+                updateP(cw/2, ch/2);
+            }
+
+            function drawM() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                for(let r=0; r<rows; r++) {
+                    for(let c=0; c<cols; c++) {
+                        
+                        // קירות המבוך (1)
+                        if(curMap[r][c] === 1) {
+                            let grad = ctx.createLinearGradient(c*cw, r*ch, (c+1)*cw, (r+1)*ch);
+                            grad.addColorStop(0, '#5a3d82');
+                            grad.addColorStop(1, '#2c1e4a');
+                            ctx.fillStyle = grad; 
+                            
+                            ctx.shadowColor = '#bc84ee'; 
+                            ctx.shadowBlur = 8;
+                            ctx.fillRect(c*cw+2, r*ch+2, cw-4, ch-4);
+                            
+                            ctx.shadowBlur = 0;
+                            ctx.strokeStyle = 'rgba(203, 227, 240, 0.4)';
+                            ctx.strokeRect(c*cw+3, r*ch+3, cw-6, ch-6);
+                        } 
+                        // פרי שטן (2)
+                        else if(curMap[r][c] === 2) {
+                            if(fruitImg.complete && fruitImg.naturalWidth !== 0) {
+                                ctx.drawImage(fruitImg, c*cw + cw*0.2, r*ch + ch*0.2, cw*0.6, ch*0.6);
+                            } else {
+                                ctx.font = "20px Arial"; 
+                                ctx.fillText("🔮", c*cw+cw/4, r*ch+ch/1.5);
+                            }
+                        } 
+                        // סוף המסלול (3)
+                        else if(curMap[r][c] === 3) {
+                            ctx.fillStyle = "rgba(255,159,67,0.3)"; 
+                            ctx.fillRect(c*cw, r*ch, cw, ch);
+                        }
+                    }
+                }
+            }
+
+            // הזזת הדמות (תיקון מיקום מרוכז)
+            function updateP(x,y) { 
+                player.style.left = (x - 22.5) + "px"; 
+                player.style.top = (y - 22.5) + "px"; 
+            }
+
+            function move(e) {
+                if(!isDragging) return;
+                e.preventDefault();
+                
+                const rect = canvas.getBoundingClientRect();
+                const t = e.touches ? e.touches[0] : e;
+                const x = t.clientX - rect.left; 
+                const y = t.clientY - rect.top;
+                
+                const c = Math.floor(x/cw); 
+                const r = Math.floor(y/ch);
+
+                // בדיקה שלא נתקעים בקיר ושלא יוצאים מגבולות
+                if(r>=0 && r<rows && c>=0 && c<cols && curMap[r][c] !== 1) {
+                    updateP(x,y);
+                    
+                    // איסוף פרי
+                    if(curMap[r][c] === 2) { 
+                        curMap[r][c]=0; 
+                        appState.mazeScore += 15; 
+                        document.getElementById('m-scr').innerText = appState.mazeScore; 
+                        drawM(); 
+                    }
+                    
+                    // הגעה ליציאה (3)
+                    if(curMap[r][c] === 3) {
+                        isDragging = false;
+                        if(appState.mazeLevel < 2) { 
+                            appState.mazeLevel++; 
+                            setTimeout(() => startMLevel(appState.mazeLevel), 300); 
+                        }
+                        else { 
+                            alert("אלופה! עברת את כל המבוכים ואספת " + appState.mazeScore + " נקודות!"); 
+                        }
+                    }
+                }
+            }
+
+            fruitImg.onload = drawM;
+            
+            // מאזיני אירועים למגע ועכבר
+            canvas.addEventListener('touchstart', (e)=>{isDragging=true; move(e);}, {passive:false});
+            canvas.addEventListener('touchmove', move, {passive:false});
+            canvas.addEventListener('touchend', ()=>isDragging=false);
+            canvas.addEventListener('mousedown', (e)=>{isDragging=true; move(e);});
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', ()=>isDragging=false);
+            canvas.addEventListener('mouseleave', ()=>isDragging=false);
+            
+            // התחלת המשחק בשלב 0
+            startMLevel(0);
+        }
+    </script>
+</body>
+</html>
