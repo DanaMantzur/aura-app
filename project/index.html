@@ -225,7 +225,6 @@
             pointer-events: none; /* מאפשר לחיצה לעבור דרך האזור הריק */
         }
 
-        /* התיקון לניקוד - רקע כהה יותר, שכבה נמוכה וביטול מגע */
         .game-badge {
             background: rgba(15, 27, 41, 0.6);
             padding: 6px 12px;
@@ -286,7 +285,6 @@
         
         #maze-canvas { width: 100%; height: 100%; touch-action: none; }
         
-        /* התיקון לדמות - תמיד מעל הכל (z-index: 100) */
         .maze-avatar { 
             position: absolute; width: 45px; height: 45px; object-fit: contain;
             pointer-events: none; z-index: 100; 
@@ -321,6 +319,13 @@
             transform: scale(0.92);
             z-index: 5;
             box-shadow: 0 0 15px var(--aura-orange-glow);
+        }
+
+        .puzzle-piece.locked {
+            border: 2px solid #4CAF50;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+            pointer-events: none; /* נועל את החלק מלחיצות נוספות */
+            z-index: 1;
         }
 
         .puzzle-reference-box {
@@ -493,17 +498,14 @@
         }
 
         // =========================================
-        // לוגיקת פאזל התאמה (Swap)
+        // לוגיקת פאזל התאמה (Swap) - מעודכן עם נעילה
         // =========================================
         function initPuzzle() {
             const container = document.getElementById('puzzle-container');
             const levelTxt = document.getElementById('p-lvl');
             const refBox = document.getElementById('p-ref');
             
-            // התמונה שנמשכת לפי הדמות
             const bgImg = `${appState.selectedCharacter}-bg.png`;
-            
-            // רמות קושי: 4x4 (16), 6x6 (36), 8x8 (64)
             const sizes = [4, 6, 8];
             let selected = null;
 
@@ -518,14 +520,9 @@
                 
                 let piecesData = [];
                 for (let i = 0; i < total; i++) {
-                    piecesData.push({
-                        id: i,
-                        x: (i % n) / (n - 1) * 100,
-                        y: Math.floor(i / n) / (n - 1) * 100
-                    });
+                    piecesData.push({ id: i, x: (i % n) / (n - 1) * 100, y: Math.floor(i / n) / (n - 1) * 100 });
                 }
 
-                // ערבוב החלקים בצורה אקראית
                 let shuffled = [...piecesData].sort(() => Math.random() - 0.5);
 
                 shuffled.forEach((data, i) => {
@@ -535,18 +532,25 @@
                     piece.style.backgroundSize = `${n * 100}% ${n * 100}%`;
                     piece.style.backgroundPosition = `${data.x}% ${data.y}%`;
                     
-                    // שמירת המזהה המקורי (לבדוק ניצחון)
                     piece.dataset.correctId = data.id;
+                    piece.dataset.currentSpot = i; // שמירת המיקום הנוכחי של החלק בלוח
                     
-                    // גיבוי צבעוני אם התמונה חסרה
                     piece.style.backgroundColor = `hsl(${(data.id * 15) % 360}, 70%, 60%)`;
                     
+                    // בדיקה ראשונית: אם בערבוב החלק נפל בדיוק במקום הנכון שלו - ננעל אותו מראש
+                    if (parseInt(piece.dataset.correctId) === parseInt(piece.dataset.currentSpot)) {
+                        piece.classList.add('locked');
+                    }
+                    
                     piece.onclick = () => {
+                        // אם החלק נעול, אי אפשר לבחור אותו
+                        if (piece.classList.contains('locked')) return;
+
                         if (!selected) {
                             selected = piece;
                             piece.classList.add('selected');
                         } else {
-                            // ביצוע ההחלפה (Swap)
+                            // ביצוע ההחלפה (החומר הויזואלי וה-ID מתחלפים, המיקום currentSpot נשאר קבוע לאותו DIV)
                             const sPos = selected.style.backgroundPosition;
                             const sId = selected.dataset.correctId;
                             const sColor = selected.style.backgroundColor;
@@ -560,9 +564,16 @@
                             piece.style.backgroundColor = sColor;
                             
                             selected.classList.remove('selected');
-                            selected = null;
                             
-                            // בדיקת ניצחון אחרי כל מהלך
+                            // אחרי ההחלפה, בודקים אם מישהו מהם הגיע למקום הנכון וצריך לנעול אותו
+                            if (parseInt(selected.dataset.correctId) === parseInt(selected.dataset.currentSpot)) {
+                                selected.classList.add('locked');
+                            }
+                            if (parseInt(piece.dataset.correctId) === parseInt(piece.dataset.currentSpot)) {
+                                piece.classList.add('locked');
+                            }
+                            
+                            selected = null;
                             checkWin();
                         }
                     };
@@ -573,8 +584,10 @@
             function checkWin() {
                 const pieces = document.querySelectorAll('.puzzle-piece');
                 let win = true;
-                pieces.forEach((p, i) => {
-                    if (parseInt(p.dataset.correctId) !== i) win = false;
+                
+                // הניצחון קורה כשכל החלקים על הלוח קיבלו את הסטטוס נעול
+                pieces.forEach(p => {
+                    if (!p.classList.contains('locked')) win = false;
                 });
 
                 if (win) {
