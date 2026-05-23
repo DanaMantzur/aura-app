@@ -403,16 +403,13 @@
             puzzleLevel: 0
         };
 
-        // ניווט בין מסכים
         function navigateTo(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
-        // טיימר אוטומטי למסך פתיחה
         setTimeout(() => navigateTo('screen-intro'), 4000);
 
-        // פונקציית בחירת דמות
         function selectChar(char) {
             appState.selectedCharacter = char;
             document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
@@ -420,9 +417,7 @@
             setTimeout(() => navigateTo('screen-dashboard'), 500);
         }
 
-        // טעינת משחקים מתוך ה-Dropdown
         function loadGame(game) {
-            // ניקוי טיימרים קודמים
             if (appState.breathingInterval) {
                 clearInterval(appState.breathingInterval);
                 appState.breathingInterval = null;
@@ -431,7 +426,6 @@
             const zone = document.getElementById('game-zone');
             zone.innerHTML = '';
 
-            // --- 1. משחק נשימה ---
             if (game === 'breathe') {
                 zone.innerHTML = `
                     <div class="breathing-game-container">
@@ -446,22 +440,19 @@
                 const circ = document.getElementById('b-circle');
                 
                 function runBreathing() {
-                    // שלב שאיפה: 4 שניות
                     txt.innerText = "לקחת אוויר...";
                     circ.classList.add('inhale');
                     
                     setTimeout(() => {
-                        // שלב נשיפה: 8 שניות
                         txt.innerText = "ולשחרר...";
                         circ.classList.remove('inhale');
                     }, 4000);
                 }
 
-                runBreathing(); // הרצה ראשונה
-                appState.breathingInterval = setInterval(runBreathing, 12000); // מחזור כולל של 12 שניות
+                runBreathing();
+                appState.breathingInterval = setInterval(runBreathing, 12000);
             }
 
-            // --- 2. מבוך ריכוז ---
             else if (game === 'maze') {
                 appState.mazeScore = 0; 
                 appState.mazeLevel = 0;
@@ -479,9 +470,9 @@
                 initMaze();
             }
 
-            // --- 3. פאזל התאמה ---
             else if (game === 'puzzle') {
                 appState.puzzleLevel = 0;
+                // שימי לב לתיקון החשוב כאן: הוספנו dir="ltr" לתיבה של הפאזל!
                 zone.innerHTML = `
                     <div class="top-bar-game">
                         <div class="game-badge">שלב <span id="p-lvl">1</span>/3</div>
@@ -490,7 +481,7 @@
                             <span class="reference-label">המטרה</span>
                         </div>
                     </div>
-                    <div id="puzzle-container"></div>
+                    <div id="puzzle-container" dir="ltr"></div>
                     <p style="color:var(--ice-blue); font-size:16px; margin-top:10px; font-weight:bold;">געו בשני חלקים כדי להחליף ביניהם</p>`;
                 
                 initPuzzle();
@@ -498,7 +489,7 @@
         }
 
         // =========================================
-        // לוגיקת פאזל התאמה (Swap) - מעודכן עם נעילה
+        // פאזל - לוגיקה מעודכנת ואמינה
         // =========================================
         function initPuzzle() {
             const container = document.getElementById('puzzle-container');
@@ -518,76 +509,62 @@
                 const total = n * n;
                 container.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
                 
-                let piecesData = [];
+                let pieces = [];
                 for (let i = 0; i < total; i++) {
-                    piecesData.push({ id: i, x: (i % n) / (n - 1) * 100, y: Math.floor(i / n) / (n - 1) * 100 });
-                }
-
-                let shuffled = [...piecesData].sort(() => Math.random() - 0.5);
-
-                shuffled.forEach((data, i) => {
                     const piece = document.createElement('div');
                     piece.classList.add('puzzle-piece');
+                    
+                    const x = (i % n) / (n - 1) * 100;
+                    const y = Math.floor(i / n) / (n - 1) * 100;
+                    
                     piece.style.backgroundImage = `url(${bgImg})`;
                     piece.style.backgroundSize = `${n * 100}% ${n * 100}%`;
-                    piece.style.backgroundPosition = `${data.x}% ${data.y}%`;
-                    
-                    piece.dataset.correctId = data.id;
-                    piece.dataset.currentSpot = i; // שמירת המיקום הנוכחי של החלק בלוח
-                    
-                    piece.style.backgroundColor = `hsl(${(data.id * 15) % 360}, 70%, 60%)`;
-                    
-                    // בדיקה ראשונית: אם בערבוב החלק נפל בדיוק במקום הנכון שלו - ננעל אותו מראש
-                    if (parseInt(piece.dataset.correctId) === parseInt(piece.dataset.currentSpot)) {
-                        piece.classList.add('locked');
-                    }
+                    piece.style.backgroundPosition = `${x}% ${y}%`;
+                    piece.dataset.correctId = i;
+                    piece.style.backgroundColor = `hsl(${(i * 15) % 360}, 70%, 60%)`;
                     
                     piece.onclick = () => {
-                        // אם החלק נעול, אי אפשר לבחור אותו
                         if (piece.classList.contains('locked')) return;
 
                         if (!selected) {
                             selected = piece;
                             piece.classList.add('selected');
+                        } else if (selected === piece) {
+                            selected.classList.remove('selected');
+                            selected = null;
                         } else {
-                            // ביצוע ההחלפה (החומר הויזואלי וה-ID מתחלפים, המיקום currentSpot נשאר קבוע לאותו DIV)
-                            const sPos = selected.style.backgroundPosition;
-                            const sId = selected.dataset.correctId;
-                            const sColor = selected.style.backgroundColor;
-                            
-                            selected.style.backgroundPosition = piece.style.backgroundPosition;
-                            selected.dataset.correctId = piece.dataset.correctId;
-                            selected.style.backgroundColor = piece.style.backgroundColor;
-                            
-                            piece.style.backgroundPosition = sPos;
-                            piece.dataset.correctId = sId;
-                            piece.style.backgroundColor = sColor;
+                            // ביצוע ההחלפה ישירות ברמת ה-DOM (מונע חוסר סנכרון של ה-CSS)
+                            const sibling = selected.nextSibling === piece ? selected : selected.nextSibling;
+                            piece.parentNode.insertBefore(selected, piece);
+                            container.insertBefore(piece, sibling);
                             
                             selected.classList.remove('selected');
-                            
-                            // אחרי ההחלפה, בודקים אם מישהו מהם הגיע למקום הנכון וצריך לנעול אותו
-                            if (parseInt(selected.dataset.correctId) === parseInt(selected.dataset.currentSpot)) {
-                                selected.classList.add('locked');
-                            }
-                            if (parseInt(piece.dataset.correctId) === parseInt(piece.dataset.currentSpot)) {
-                                piece.classList.add('locked');
-                            }
-                            
                             selected = null;
+                            
                             checkWin();
                         }
                     };
-                    container.appendChild(piece);
-                });
+                    pieces.push(piece);
+                }
+
+                // ערבוב והכנסה ללוח
+                pieces.sort(() => Math.random() - 0.5);
+                pieces.forEach(p => container.appendChild(p));
+                
+                // בדיקת נעילות ראשונית (למקרה שחלקים נפלו בדיוק למקום בערבוב)
+                checkWin();
             }
 
             function checkWin() {
-                const pieces = document.querySelectorAll('.puzzle-piece');
                 let win = true;
                 
-                // הניצחון קורה כשכל החלקים על הלוח קיבלו את הסטטוס נעול
-                pieces.forEach(p => {
-                    if (!p.classList.contains('locked')) win = false;
+                // בודקים כל חלק, האם המיקום הפיזי שלו (index) שווה למזהה המקורי שלו (correctId)
+                Array.from(container.children).forEach((piece, index) => {
+                    if (parseInt(piece.dataset.correctId) === index) {
+                        piece.classList.add('locked');
+                    } else {
+                        win = false; // מספיק שחלק אחד לא במקום כדי שלא ננצח
+                    }
                 });
 
                 if (win) {
@@ -603,12 +580,11 @@
                 }
             }
 
-            // הפעלת השלב הראשון
             startLevel(0);
         }
 
         // =========================================
-        // לוגיקת מבוך ריכוז
+        // מבוך
         // =========================================
         function initMaze() {
             const canvas = document.getElementById('maze-canvas');
@@ -619,17 +595,12 @@
             canvas.width = container.clientWidth; 
             canvas.height = container.clientHeight;
 
-            // תמונת פרי השטן
             const fruitImg = new Image();
             fruitImg.src = 'devil-fruit.png';
 
-            // 3 רמות קושי של מפות
             const maps = [
-                // שלב 1: מרווח
                 [[0,1,1,1,1],[0,0,2,0,1],[1,1,1,0,1],[1,2,0,0,0],[1,1,1,1,3]],
-                // שלב 2: בינוני
                 [[0,0,1,1,1,1,1],[1,0,0,2,1,0,1],[1,1,1,0,1,0,1],[1,2,0,0,0,0,1],[1,0,1,1,1,2,1],[1,0,0,0,1,0,3]],
-                // שלב 3: צפוף
                 [[0,1,1,1,1,1,1,1,1],[0,0,0,0,2,0,0,0,1],[1,1,1,1,1,0,1,1,1],[1,2,0,0,0,0,1,2,1],[1,0,1,1,1,1,1,0,1],[1,0,0,2,0,0,0,0,0],[1,1,1,1,1,1,1,1,3]]
             ];
 
@@ -651,23 +622,18 @@
                 ctx.clearRect(0,0,canvas.width,canvas.height);
                 for(let r=0; r<rows; r++) {
                     for(let c=0; c<cols; c++) {
-                        
-                        // קירות המבוך (1)
                         if(curMap[r][c] === 1) {
                             let grad = ctx.createLinearGradient(c*cw, r*ch, (c+1)*cw, (r+1)*ch);
                             grad.addColorStop(0, '#5a3d82');
                             grad.addColorStop(1, '#2c1e4a');
                             ctx.fillStyle = grad; 
-                            
                             ctx.shadowColor = '#bc84ee'; 
                             ctx.shadowBlur = 8;
                             ctx.fillRect(c*cw+2, r*ch+2, cw-4, ch-4);
-                            
                             ctx.shadowBlur = 0;
                             ctx.strokeStyle = 'rgba(203, 227, 240, 0.4)';
                             ctx.strokeRect(c*cw+3, r*ch+3, cw-6, ch-6);
                         } 
-                        // פרי שטן (2)
                         else if(curMap[r][c] === 2) {
                             if(fruitImg.complete && fruitImg.naturalWidth !== 0) {
                                 ctx.drawImage(fruitImg, c*cw + cw*0.2, r*ch + ch*0.2, cw*0.6, ch*0.6);
@@ -676,7 +642,6 @@
                                 ctx.fillText("🔮", c*cw+cw/4, r*ch+ch/1.5);
                             }
                         } 
-                        // סוף המסלול (3)
                         else if(curMap[r][c] === 3) {
                             ctx.fillStyle = "rgba(255,159,67,0.3)"; 
                             ctx.fillRect(c*cw, r*ch, cw, ch);
@@ -685,7 +650,6 @@
                 }
             }
 
-            // הזזת הדמות (תיקון מיקום מרוכז)
             function updateP(x,y) { 
                 player.style.left = (x - 22.5) + "px"; 
                 player.style.top = (y - 22.5) + "px"; 
@@ -703,26 +667,20 @@
                 const c = Math.floor(x/cw); 
                 const r = Math.floor(y/ch);
 
-                // בדיקה שלא נתקעים בקיר ושלא יוצאים מגבולות
                 if(r>=0 && r<rows && c>=0 && c<cols && curMap[r][c] !== 1) {
                     updateP(x,y);
-                    
-                    // איסוף פרי
                     if(curMap[r][c] === 2) { 
                         curMap[r][c]=0; 
                         appState.mazeScore += 15; 
                         document.getElementById('m-scr').innerText = appState.mazeScore; 
                         drawM(); 
                     }
-                    
-                    // הגעה ליציאה (3)
                     if(curMap[r][c] === 3) {
                         isDragging = false;
                         if(appState.mazeLevel < 2) { 
                             appState.mazeLevel++; 
                             setTimeout(() => startMLevel(appState.mazeLevel), 300); 
-                        }
-                        else { 
+                        } else { 
                             alert("אלופה! עברת את כל המבוכים ואספת " + appState.mazeScore + " נקודות!"); 
                         }
                     }
@@ -730,8 +688,6 @@
             }
 
             fruitImg.onload = drawM;
-            
-            // מאזיני אירועים למגע ועכבר
             canvas.addEventListener('touchstart', (e)=>{isDragging=true; move(e);}, {passive:false});
             canvas.addEventListener('touchmove', move, {passive:false});
             canvas.addEventListener('touchend', ()=>isDragging=false);
@@ -740,7 +696,6 @@
             canvas.addEventListener('mouseup', ()=>isDragging=false);
             canvas.addEventListener('mouseleave', ()=>isDragging=false);
             
-            // התחלת המשחק בשלב 0
             startMLevel(0);
         }
     </script>
