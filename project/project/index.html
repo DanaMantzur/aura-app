@@ -41,7 +41,7 @@
         }
 
         /* =========================================
-           2. מעטפת המסכים
+           2. מעטפת המסכים וחלונות קופצים
            ========================================= */
         .screen {
             display: none;
@@ -64,6 +64,39 @@
         @keyframes fadeInScreen {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(10, 17, 40, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+        
+        .fullscreen-overlay img {
+            width: 85%;
+            max-width: 400px;
+            border-radius: 15px;
+            border: 2px solid var(--ice-blue);
+            box-shadow: 0 0 30px rgba(203, 227, 240, 0.3);
+            object-fit: contain;
+        }
+
+        .close-overlay-btn {
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid var(--ice-blue);
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         /* =========================================
@@ -222,7 +255,7 @@
             justify-content: space-between;
             align-items: center;
             z-index: 10;
-            pointer-events: none; /* מאפשר לחיצה לעבור דרך האזור הריק */
+            pointer-events: none;
         }
 
         .game-badge {
@@ -322,9 +355,7 @@
         }
 
         .puzzle-piece.locked {
-            border: 2px solid #4CAF50;
-            box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
-            pointer-events: none; /* נועל את החלק מלחיצות נוספות */
+            pointer-events: none; /* נועל את החלק מלחיצות נוספות, הסרנו מסגרת ירוקה */
             z-index: 1;
         }
 
@@ -349,6 +380,12 @@
     </style>
 </head>
 <body>
+
+    <!-- חלון קופץ לתמונת רפרנס מוגדלת -->
+    <div id="ref-overlay" class="fullscreen-overlay" onclick="this.style.display='none'">
+        <img id="ref-large-img" src="">
+        <button class="close-overlay-btn">סגירה</button>
+    </div>
 
     <div id="screen-splash" class="screen active">
         <img src="logo.png" class="splash-logo" onerror="this.style.display='none'; this.after('AURA SQUAD')">
@@ -477,8 +514,8 @@
                     <div class="top-bar-game">
                         <div class="game-badge">שלב <span id="p-lvl">1</span>/3</div>
                         <div style="display:flex; flex-direction:column; align-items:center; pointer-events:auto;">
-                            <div id="p-ref" class="puzzle-reference-box"></div>
-                            <span class="reference-label">המטרה</span>
+                            <div id="p-ref" class="puzzle-reference-box" title="לחצי להגדלה"></div>
+                            <span class="reference-label">המטרה (לחיצה להגדלה)</span>
                         </div>
                     </div>
                     <div id="puzzle-container" dir="ltr"></div>
@@ -487,14 +524,13 @@
                 initPuzzle();
             }
 
-            // הוספנו כאן את המעבר למשחק החיצוני!
             else if (game === 'pearls') {
                 window.location.href = 'glowing-breath.html';
             }
         }
 
         // =========================================
-        // פאזל - לוגיקה מעודכנת ואמינה
+        // פאזל 
         // =========================================
         function initPuzzle() {
             const container = document.getElementById('puzzle-container');
@@ -502,6 +538,14 @@
             const refBox = document.getElementById('p-ref');
             
             const bgImg = `${appState.selectedCharacter}-bg.png`;
+            
+            // הגדרת פתיחת החלון המוגדל בלחיצה
+            refBox.style.cursor = 'pointer';
+            refBox.onclick = () => {
+                document.getElementById('ref-large-img').src = bgImg;
+                document.getElementById('ref-overlay').style.display = 'flex';
+            };
+
             const sizes = [4, 6, 8];
             let selected = null;
 
@@ -538,7 +582,6 @@
                             selected.classList.remove('selected');
                             selected = null;
                         } else {
-                            // ביצוע ההחלפה ישירות ברמת ה-DOM (מונע חוסר סנכרון של ה-CSS)
                             const sibling = selected.nextSibling === piece ? selected : selected.nextSibling;
                             piece.parentNode.insertBefore(selected, piece);
                             container.insertBefore(piece, sibling);
@@ -552,23 +595,20 @@
                     pieces.push(piece);
                 }
 
-                // ערבוב והכנסה ללוח
                 pieces.sort(() => Math.random() - 0.5);
                 pieces.forEach(p => container.appendChild(p));
                 
-                // בדיקת נעילות ראשונית (למקרה שחלקים נפלו בדיוק למקום בערבוב)
                 checkWin();
             }
 
             function checkWin() {
                 let win = true;
                 
-                // בודקים כל חלק, האם המיקום הפיזי שלו (index) שווה למזהה המקורי שלו (correctId)
                 Array.from(container.children).forEach((piece, index) => {
                     if (parseInt(piece.dataset.correctId) === index) {
                         piece.classList.add('locked');
                     } else {
-                        win = false; // מספיק שחלק אחד לא במקום כדי שלא ננצח
+                        win = false; 
                     }
                 });
 
