@@ -225,9 +225,13 @@
     </style>
 </head>
 <body>
+    
+    <audio id="bg-music" loop preload="auto">
+        <source src="ambient.mp3" type="audio/mpeg">
+    </audio>
 
-    <audio id="bg-audio" loop>
-        <source src="underwater.mp3" type="audio/mpeg">
+    <audio id="success-sfx" preload="auto">
+        <source src="water-drop.mp3" type="audio/mpeg">
     </audio>
 
     <div id="darkness-overlay"></div>
@@ -279,7 +283,9 @@
         const dChoices = document.getElementById('d-choices');
         const inventory = document.getElementById('inventory');
         const pearlsContainer = document.getElementById('pearls-container');
-        const bgAudio = document.getElementById('bg-audio');
+        
+        const bgAudio = document.getElementById('bg-music');
+        const sfxAudio = document.getElementById('success-sfx');
         const darknessOverlay = document.getElementById('darkness-overlay');
 
         function startGame() {
@@ -309,7 +315,16 @@
         function handleChoice(choiceNum) {
             dChoices.innerHTML = ''; 
             
-            bgAudio.play().catch(e => console.log("הסאונד דורש קובץ קיים בשם underwater.mp3 בתיקייה"));
+            // טריק: "מנגנים" את צליל הטיפה על שקט כדי לאשר אותו לדפדפן
+            sfxAudio.volume = 0;
+            sfxAudio.play().then(() => {
+                sfxAudio.pause();
+                sfxAudio.currentTime = 0;
+                sfxAudio.volume = 1; // מחזירים לעוצמה מלאה לקראת הלחיצה האמיתית
+            }).catch(e => console.log("Pre-play blocked: " + e));
+
+            // הפעלת מוזיקת הרקע
+            bgAudio.play().catch(e => console.log("Bg audio blocked: " + e));
 
             if (choiceNum === 1) {
                 dText.innerText = dialogueTexts.response1;
@@ -351,6 +366,10 @@
         }
 
         function collectPearl(pearlElement) {
+            // הפעלת הסאונד (עכשיו הוא מוכן מראש)
+            sfxAudio.currentTime = 0; 
+            sfxAudio.play().catch(e => console.log("Click sound blocked: " + e));
+
             pearlElement.classList.add('collected'); 
             collectedPearls++;
             inventory.innerText = `פנינים: ${collectedPearls}/${totalPearls}`;
@@ -374,4 +393,4 @@
 
     </script>
 </body>
-</html> 
+</html>

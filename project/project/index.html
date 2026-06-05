@@ -99,6 +99,31 @@
             cursor: pointer;
         }
 
+        /* כפתור שליטה במוזיקה */
+        .music-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--glass-bg);
+            border: 1px solid var(--ice-blue);
+            color: #fff;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .music-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
         /* =========================================
            3. מסך Splash ומבוא
            ========================================= */
@@ -283,7 +308,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 20px;
         }
         
-        .instruction-text-display { font-size: 22px; font-weight: 700; height: 30px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+        .instruction-text-display { font-size: 26px; font-weight: 700; height: 35px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
         .breathing-playground { position: relative; width: 100%; height: 240px; display: flex; justify-content: center; align-items: center; }
         
         .breathing-circle { 
@@ -355,7 +380,7 @@
         }
 
         .puzzle-piece.locked {
-            pointer-events: none; /* נועל את החלק מלחיצות נוספות, הסרנו מסגרת ירוקה */
+            pointer-events: none;
             z-index: 1;
         }
 
@@ -381,7 +406,12 @@
 </head>
 <body>
 
-    <!-- חלון קופץ לתמונת רפרנס מוגדלת -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="ambient.mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="music-toggle" class="music-btn" onclick="toggleMusic()">🔊</button>
+
     <div id="ref-overlay" class="fullscreen-overlay" onclick="this.style.display='none'">
         <img id="ref-large-img" src="">
         <button class="close-overlay-btn">סגירה</button>
@@ -396,7 +426,7 @@
             <img src="all-images.png" onerror="this.style.display='none'">
         </div>
         <h1 class="headline">לבחירת הבובה הדיגיטלית לחץ כאן</h1>
-        <button class="btn-glass" onclick="navigateTo('screen-selection')">המשך</button>
+        <button class="btn-glass" onclick="startGameFlow()">המשך</button>
     </div>
 
     <div id="screen-selection" class="screen">
@@ -436,10 +466,50 @@
         let appState = {
             selectedCharacter: 'pebble',
             breathingInterval: null,
+            breatheCountInterval: null,
             mazeScore: 0,
             mazeLevel: 0,
             puzzleLevel: 0
         };
+
+        // --- ניהול מוזיקה ---
+        const bgMusic = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-toggle');
+        let isMusicPlaying = false;
+
+        // פונקציית עזר קטנה שמנסה להפעיל את המוזיקה בבטחה
+        function tryPlayMusic() {
+            if (!isMusicPlaying) {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicBtn.innerText = '🔊';
+                    musicBtn.style.display = 'block'; 
+                }).catch(e => {
+                    console.log("Play attempt postponed: " + e);
+                    musicBtn.style.display = 'block';
+                    musicBtn.innerText = '🔇'; 
+                });
+            }
+        }
+
+        function startGameFlow() {
+            tryPlayMusic();
+            navigateTo('screen-selection');
+        }
+
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicBtn.innerText = '🔇';
+                isMusicPlaying = false;
+            } else {
+                bgMusic.play().then(() => {
+                    musicBtn.innerText = '🔊';
+                    isMusicPlaying = true;
+                }).catch(e => console.log(e));
+            }
+        }
+        // -------------------
 
         function navigateTo(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -449,6 +519,7 @@
         setTimeout(() => navigateTo('screen-intro'), 4000);
 
         function selectChar(char) {
+            tryPlayMusic(); // גיבוי: מנסה להפעיל שוב אם נחסם קודם
             appState.selectedCharacter = char;
             document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
             document.querySelector(`[data-char="${char}"]`).classList.add('selected');
@@ -456,9 +527,15 @@
         }
 
         function loadGame(game) {
+            tryPlayMusic(); // גיבוי נוסף: מנסה להפעיל כשבוחרים משחק מהתפריט
+            
             if (appState.breathingInterval) {
                 clearInterval(appState.breathingInterval);
                 appState.breathingInterval = null;
+            }
+            if (appState.breatheCountInterval) {
+                clearInterval(appState.breatheCountInterval);
+                appState.breatheCountInterval = null;
             }
             
             const zone = document.getElementById('game-zone');
@@ -467,7 +544,7 @@
             if (game === 'breathe') {
                 zone.innerHTML = `
                     <div class="breathing-game-container">
-                        <h2 class="instruction-text-display" id="b-text">לקחת אוויר...</h2>
+                        <h2 class="instruction-text-display" id="b-text">לקחת אוויר... 1</h2>
                         <div class="breathing-playground">
                             <div class="breathing-circle" id="b-circle"></div>
                             <img src="${appState.selectedCharacter}-side.png" class="character-side-mentor" onerror="this.src='${appState.selectedCharacter}.png'">
@@ -478,13 +555,23 @@
                 const circ = document.getElementById('b-circle');
                 
                 function runBreathing() {
-                    txt.innerText = "לקחת אוויר...";
                     circ.classList.add('inhale');
+                    let sec = 1;
+                    txt.innerText = "לקחת אוויר... " + sec;
                     
-                    setTimeout(() => {
-                        txt.innerText = "ולשחרר...";
-                        circ.classList.remove('inhale');
-                    }, 4000);
+                    appState.breatheCountInterval = setInterval(() => {
+                        sec++;
+                        if (sec <= 4) {
+                            txt.innerText = "לקחת אוויר... " + sec;
+                        } else if (sec === 5) {
+                            circ.classList.remove('inhale');
+                            txt.innerText = "ולשחרר... 1";
+                        } else if (sec <= 12) {
+                            txt.innerText = "ולשחרר... " + (sec - 4);
+                        } else {
+                            clearInterval(appState.breatheCountInterval);
+                        }
+                    }, 1000);
                 }
 
                 runBreathing();
@@ -539,14 +626,13 @@
             
             const bgImg = `${appState.selectedCharacter}-bg.png`;
             
-            // הגדרת פתיחת החלון המוגדל בלחיצה
             refBox.style.cursor = 'pointer';
             refBox.onclick = () => {
                 document.getElementById('ref-large-img').src = bgImg;
                 document.getElementById('ref-overlay').style.display = 'flex';
             };
 
-            const sizes = [4, 6, 8];
+            const sizes = [3, 4, 5]; 
             let selected = null;
 
             function startLevel(idx) {
