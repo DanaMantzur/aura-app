@@ -406,7 +406,7 @@
             font-weight: bold;
         }
 
-        /* =========================================
+      /* =========================================
            9. משחק פנינים (לנשום במעמקים)
            ========================================= */
         #screen-pearls {
@@ -416,40 +416,26 @@
             background-position: center;
             background-repeat: no-repeat;
             padding: 0;
-            display: none; /* כברירת מחדל מוסתר, נשלט ע"י class active */
+            display: none;
+            max-width: 100vw !important; /* התיקון: מאפשר לרקע להתפרס על כל המסך */
         }
 
-        #screen-pearls.active {
-            display: flex;
-        }
+        #screen-pearls.active { display: flex; }
 
         #darkness-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(4, 9, 20, 0.85); 
-            z-index: 2; 
-            pointer-events: none;
-            transition: opacity 1s ease-in-out;
+            z-index: 2; pointer-events: none; transition: opacity 1s ease-in-out;
         }
 
         #pearls-game-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 5;
+            width: 100%; height: 100%; max-width: 480px; margin: 0 auto;
+            position: relative; display: flex; flex-direction: column; align-items: center; z-index: 5;
         }
 
         .bubble {
-            position: absolute;
-            bottom: -20px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            animation: rise linear infinite;
-            pointer-events: none; 
-            z-index: 1; 
+            position: absolute; bottom: -20px; background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%; animation: rise linear infinite; pointer-events: none; z-index: 1; 
         }
 
         @keyframes rise {
@@ -460,120 +446,52 @@
         }
 
         .pearls-top-bar {
-            width: 100%;
-            padding: 20px;
-            display: flex;
-            justify-content: flex-start;
-            z-index: 10;
+            width: 100%; padding: 20px; display: flex; justify-content: flex-start;
+            align-items: flex-start; /* התיקון: מונע מהתיבה של הפנינים להימתח למטה */
+            z-index: 10; pointer-events: none; /* התיקון: מאפשר ללחיצות לעבור דרך האזור הריק */
         }
 
         .inventory-badge {
-            background: rgba(10, 17, 40, 0.85); 
-            border: 2px solid var(--ice-blue); 
-            padding: 10px 20px; 
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            font-weight: bold;
-            font-size: 18px; 
-            color: #ffffff; 
+            background: rgba(10, 17, 40, 0.85); border: 2px solid var(--ice-blue); 
+            padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(10px);
+            font-weight: bold; font-size: 18px; color: #ffffff; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 15px rgba(203, 227, 240, 0.3); 
-            opacity: 0;
-            transition: opacity 0.5s;
+            opacity: 0; transition: opacity 0.5s;
+            height: fit-content; pointer-events: auto; /* מחזיר לחיצה רק לתווית עצמה */
         }
 
         .character-container {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
+            margin-top: 20px; display: flex; flex-direction: column; align-items: center;
+            z-index: 10; pointer-events: none; /* מוודא שתיבת הדו-שיח לא חוסמת לחיצות */
         }
 
-        .jellyfish-avatar {
-            width: 120px;
-            animation: float 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 20px rgba(203, 227, 240, 0.5));
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
+        .jellyfish-avatar { width: 120px; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(203, 227, 240, 0.5)); }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
         .dialogue-box {
-            background: rgba(15, 27, 50, 0.95); 
-            border: 2px solid var(--ice-blue); 
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px;
-            text-align: center;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 0 35px rgba(203, 227, 240, 0.5); 
-            max-width: 90%;
-            min-height: 100px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            transition: opacity 1s;
+            background: rgba(15, 27, 50, 0.95); border: 2px solid var(--ice-blue); 
+            border-radius: 15px; padding: 20px; margin: 20px; text-align: center;
+            backdrop-filter: blur(8px); box-shadow: 0 0 35px rgba(203, 227, 240, 0.5); 
+            max-width: 90%; min-height: 100px; display: flex; flex-direction: column; justify-content: center;
+            transition: opacity 1s; pointer-events: auto; /* מחזיר לחיצה לכפתורי הדיבור */
         }
 
-        .dialogue-text {
-            font-size: 18px;
-            line-height: 1.4;
-            margin-bottom: 15px;
-            color: #ffffff; 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
+        .dialogue-text { font-size: 18px; line-height: 1.4; margin-bottom: 15px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .choices-container { display: flex; flex-direction: column; gap: 10px; }
+        .choice-btn { background: rgba(255, 255, 255, 0.15); border: 1px solid var(--ice-blue); color: #ffffff; font-weight: bold; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .choice-btn:hover { background: rgba(255, 255, 255, 0.3); box-shadow: 0 0 15px rgba(203, 227, 240, 0.4); }
 
-        .choices-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .choice-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid var(--ice-blue);
-            color: #ffffff;
-            font-weight: bold;
-            padding: 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .choice-btn:hover { 
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 15px rgba(203, 227, 240, 0.4);
-        }
-
-        .pearls-area {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 5; 
-        }
+        .pearls-area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 
         .pearl {
-            position: absolute;
-            width: 45px; height: 45px;
+            position: absolute; width: 45px; height: 45px;
             background: radial-gradient(circle, #fff 0%, var(--ice-blue) 70%, transparent 100%);
-            border-radius: 50%;
-            cursor: pointer;
-            pointer-events: auto;
-            opacity: 0;
-            transform: scale(0);
-            transition: opacity 0.5s;
-            animation: breatheAndDrift 5.5s infinite ease-in-out;
+            border-radius: 50%; cursor: pointer; pointer-events: auto; opacity: 0; transform: scale(0);
+            transition: opacity 0.5s; animation: breatheAndDrift 5.5s infinite ease-in-out;
+            z-index: 50; /* התיקון: מוודא שהפנינה צפה מעל כל שאר האלמנטים! */
         }
 
-        .pearl.collected {
-            transform: scale(1.5) !important;
-            opacity: 0 !important;
-            pointer-events: none;
-            animation: none; 
-        }
+        .pearl.collected { transform: scale(1.5) !important; opacity: 0 !important; pointer-events: none; animation: none; }
 
         @keyframes breatheAndDrift {
             0% { box-shadow: 0 0 10px var(--pearl-glow); transform: scale(0.8) translate(0px, 0px); }
@@ -583,31 +501,9 @@
             100% { box-shadow: 0 0 10px var(--pearl-glow); transform: scale(0.8) translate(0px, 0px); }
         }
 
-        #scene2-content {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            text-align: center;
-            padding: 30px;
-            animation: fadeIn 2s forwards;
-            z-index: 10;
-        }
-
-        .ending-box {
-            background: rgba(10, 17, 40, 0.8);
-            padding: 30px 20px;
-            border-radius: 20px;
-            backdrop-filter: blur(8px);
-            border: 3px solid var(--ice-blue); 
-            box-shadow: 0 0 25px rgba(203, 227, 240, 0.5); 
-            margin-bottom: 25px;
-            width: 90%;
-        }
-
+        #scene2-content { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 30px; animation: fadeIn 2s forwards; z-index: 10; pointer-events: auto; }
+        .ending-box { background: rgba(10, 17, 40, 0.8); padding: 30px 20px; border-radius: 20px; backdrop-filter: blur(8px); border: 3px solid var(--ice-blue); box-shadow: 0 0 25px rgba(203, 227, 240, 0.5); margin-bottom: 25px; width: 90%; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
     </style>
 </head>
 <body>
