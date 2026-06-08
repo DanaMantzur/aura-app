@@ -417,7 +417,7 @@
             background-repeat: no-repeat;
             padding: 0;
             display: none;
-            max-width: 100vw !important; /* התיקון: מאפשר לרקע להתפרס על כל המסך */
+            max-width: 100vw !important; 
         }
 
         #screen-pearls.active { display: flex; }
@@ -433,22 +433,24 @@
             position: relative; display: flex; flex-direction: column; align-items: center; z-index: 5;
         }
 
+        /* בועות חמקמקות ברקע */
         .bubble {
-            position: absolute; bottom: -20px; background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%; animation: rise linear infinite; pointer-events: none; z-index: 1; 
+            position: absolute; bottom: -20px; background: rgba(255, 255, 255, 0.12);
+            border-radius: 50%; animation: riseAndSway linear infinite; pointer-events: none; z-index: 1; 
         }
 
-        @keyframes rise {
-            0% { transform: translateY(0) scale(1); opacity: 0; }
+        @keyframes riseAndSway {
+            0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
             10% { opacity: 1; }
+            50% { transform: translateY(-50vh) translateX(30px) scale(1.1); }
             90% { opacity: 1; }
-            100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+            100% { transform: translateY(-100vh) translateX(-30px) scale(1.3); opacity: 0; }
         }
 
         .pearls-top-bar {
             width: 100%; padding: 20px; display: flex; justify-content: flex-start;
-            align-items: flex-start; /* התיקון: מונע מהתיבה של הפנינים להימתח למטה */
-            z-index: 10; pointer-events: none; /* התיקון: מאפשר ללחיצות לעבור דרך האזור הריק */
+            align-items: flex-start; 
+            z-index: 10; pointer-events: none; 
         }
 
         .inventory-badge {
@@ -457,12 +459,12 @@
             font-weight: bold; font-size: 18px; color: #ffffff; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 15px rgba(203, 227, 240, 0.3); 
             opacity: 0; transition: opacity 0.5s;
-            height: fit-content; pointer-events: auto; /* מחזיר לחיצה רק לתווית עצמה */
+            height: fit-content; pointer-events: auto; 
         }
 
         .character-container {
             margin-top: 20px; display: flex; flex-direction: column; align-items: center;
-            z-index: 10; pointer-events: none; /* מוודא שתיבת הדו-שיח לא חוסמת לחיצות */
+            z-index: 10; pointer-events: none; 
         }
 
         .jellyfish-avatar { width: 120px; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(203, 227, 240, 0.5)); }
@@ -473,7 +475,7 @@
             border-radius: 15px; padding: 20px; margin: 20px; text-align: center;
             backdrop-filter: blur(8px); box-shadow: 0 0 35px rgba(203, 227, 240, 0.5); 
             max-width: 90%; min-height: 100px; display: flex; flex-direction: column; justify-content: center;
-            transition: opacity 1s; pointer-events: auto; /* מחזיר לחיצה לכפתורי הדיבור */
+            transition: opacity 1s; pointer-events: auto; 
         }
 
         .dialogue-text { font-size: 18px; line-height: 1.4; margin-bottom: 15px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
@@ -483,21 +485,28 @@
 
         .pearls-area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 
+        /* פנינה שניתנת לאיסוף - תנועה מדיטטיבית ואנימציית פייד */
         .pearl {
             position: absolute; width: 45px; height: 45px;
             background: radial-gradient(circle, #fff 0%, var(--ice-blue) 70%, transparent 100%);
-            border-radius: 50%; cursor: pointer; pointer-events: auto; opacity: 0; transform: scale(0);
-            transition: opacity 0.5s; animation: breatheAndDrift 5.5s infinite ease-in-out;
-            z-index: 50; /* התיקון: מוודא שהפנינה צפה מעל כל שאר האלמנטים! */
+            border-radius: 50%; cursor: pointer; pointer-events: auto; opacity: 0; 
+            transition: all 1.5s ease-out; 
+            animation: breatheAndDrift 10s infinite ease-in-out; 
+            z-index: 50; 
         }
 
-        .pearl.collected { transform: scale(1.5) !important; opacity: 0 !important; pointer-events: none; animation: none; }
+        .pearl.collected { 
+            width: 90px !important; height: 90px !important; 
+            margin-left: -22.5px; margin-top: -22.5px; 
+            opacity: 0 !important; 
+            pointer-events: none; 
+        }
 
         @keyframes breatheAndDrift {
             0% { box-shadow: 0 0 10px var(--pearl-glow); transform: scale(0.8) translate(0px, 0px); }
-            33% { transform: scale(1.0) translate(25px, -30px); }
-            50% { box-shadow: 0 0 30px var(--pearl-glow); transform: scale(1.2) translate(-15px, -50px); }
-            66% { transform: scale(1.0) translate(-35px, -20px); }
+            33% { transform: scale(1.0) translate(15px, -20px); }
+            50% { box-shadow: 0 0 30px var(--pearl-glow); transform: scale(1.1) translate(-10px, -35px); }
+            66% { transform: scale(1.0) translate(-25px, -15px); }
             100% { box-shadow: 0 0 10px var(--pearl-glow); transform: scale(0.8) translate(0px, 0px); }
         }
 
@@ -508,7 +517,6 @@
 </head>
 <body>
 
-    <!-- שמע וסאונד -->
     <audio id="bg-music" loop preload="auto">
         <source src="ambient.mp3" type="audio/mpeg">
     </audio>
@@ -567,13 +575,12 @@
         </div>
     </div>
 
-    <!-- המסך החדש של הפנינים בתוך האפליקציה -->
     <div id="screen-pearls" class="screen">
         <div id="darkness-overlay"></div>
         <div id="pearls-game-container">
             <div id="scene1-content" style="width: 100%; height: 100%;">
                 <div class="pearls-top-bar">
-                    <div class="inventory-badge" id="inventory">פנינים: 0/5</div>
+                    <div class="inventory-badge" id="inventory">פנינים: 0/10</div>
                 </div>
 
                 <div class="character-container">
@@ -638,10 +645,12 @@
         function toggleMusic() {
             if (isMusicPlaying) {
                 bgMusic.pause();
+                sfxAudio.muted = true;
                 musicBtn.innerText = '🔇';
                 isMusicPlaying = false;
             } else {
                 bgMusic.play().then(() => {
+                    sfxAudio.muted = false;
                     musicBtn.innerText = '🔊';
                     isMusicPlaying = true;
                 }).catch(e => console.log(e));
@@ -750,7 +759,6 @@
             }
 
             else if (game === 'pearls') {
-                // מנווטים למסך החדש ומאתחלים את משחק הפנינים
                 navigateTo('screen-pearls');
                 initPearlsGame();
             }
@@ -970,35 +978,43 @@
         }
 
         // =========================================
-        // משחק פנינים (הועבר למסך מלא)
+        // משחק פנינים (אינסופי ומדיטטיבי)
         // =========================================
         let collectedPearls = 0;
-        const totalPearls = 5;
+        const phase1Pearls = 10; 
+        let isEndlessMode = false;
+        let pearlsActive = false;
         
         const dialogueTexts = {
-            intro: "הים מאוד סוער היום וחשוך כאן.. עזרתך נדרשת באיסוף 5 פניני נשימה כדי להאיר את קרקעית הים! שנתחיל?",
-            choice1: "בטח אפשר להתחיל",
-            choice2: "אני קצת בלחץ בעצמי",
-            response1: "מעולה לעקוב אחר הקצב שלי, לקחת אוויר ונתחיל, יש ללחוץ על הפנינים שהן מוארות ולאסוף אותן.",
-            response2: "זה בסדר גמור, לאט לאט. האיסוף הוא פנינה אחת בכל פעם, זה אפילו מרגיע ואז מתגלה העולם.",
-            ending: "הצלחת!! הארת את המעמקים. חשוב לזכור: תמיד יש אור מבפנים כשעוצרים לנשום"
+            intro: "הים סוער וחשוך מאוד<br>בשביל להאיר את קרקעית הים יש לאסוף פניני נשימה<br>שנתחיל?",
+            choice1: "כן, בטח",
+            choice2: "אני קצת בלחץ",
+            response1: "מעולה, בלחיצה על הפנינים המוארות ניתן לאסוף אותן, ולראות את ההתקדמות. ניקח אוויר ונתחיל, רק לעקוב אחר הקצב שלי.",
+            response2: "זה בסדר גמור, אין לנו לחץ - לאט לאט פנינה אחר פנינה והעולם יתגלה.",
+            pause: "הארת את המעמקים בצורה נפלאה!<br>שנמשיך לאסוף עוד?",
+            continueBtn: "כן, נמשיך לאסוף",
+            endBtn: "לא, נסיים כאן",
+            ending: "הצלחת!! הארת את המעמקים. חשוב לזכור: תמיד יש אור מבפנים כשעוצרים לנשום."
         };
 
         function initPearlsGame() {
             collectedPearls = 0;
-            document.getElementById('inventory').innerText = `פנינים: 0/5`;
+            isEndlessMode = false;
+            pearlsActive = false;
+            
+            document.getElementById('inventory').innerText = `פנינים: 0/${phase1Pearls}`;
             document.getElementById('inventory').style.opacity = '0';
             document.getElementById('darkness-overlay').style.opacity = '0.85';
             
             document.getElementById('scene1-content').style.display = 'flex';
             document.getElementById('scene2-content').style.display = 'none';
-            document.getElementById('pearls-container').innerHTML = ''; // ניקוי הבועות והפנינים מהפעלה קודמת
+            document.getElementById('pearls-container').innerHTML = ''; 
             
             const dBox = document.getElementById('d-box');
             dBox.style.display = 'flex';
             dBox.style.opacity = '1';
 
-            document.getElementById('d-text').innerText = dialogueTexts.intro;
+            document.getElementById('d-text').innerHTML = dialogueTexts.intro;
             document.getElementById('d-choices').innerHTML = `
                 <button class="choice-btn" onclick="handlePearlChoice(1)">${dialogueTexts.choice1}</button>
                 <button class="choice-btn" onclick="handlePearlChoice(2)">${dialogueTexts.choice2}</button>
@@ -1009,6 +1025,7 @@
 
         function createBubbles() {
             const container = document.getElementById('pearls-container');
+            container.innerHTML = ''; 
             for(let i=0; i<15; i++) {
                 let bubble = document.createElement('div');
                 bubble.classList.add('bubble');
@@ -1016,7 +1033,7 @@
                 bubble.style.width = size + 'px';
                 bubble.style.height = size + 'px';
                 bubble.style.left = Math.random() * 100 + 'vw'; 
-                bubble.style.animationDuration = Math.random() * 5 + 5 + 's'; 
+                bubble.style.animationDuration = Math.random() * 5 + 6 + 's'; 
                 bubble.style.animationDelay = Math.random() * 5 + 's';
                 container.appendChild(bubble);
             }
@@ -1024,70 +1041,112 @@
 
         function handlePearlChoice(choiceNum) {
             document.getElementById('d-choices').innerHTML = ''; 
-            
-            // טריק להפעלת סאונד מראש
+
+            // הטריק שפותח את הסאונד לדפדפן
             sfxAudio.volume = 0;
             sfxAudio.play().then(() => {
                 sfxAudio.pause();
                 sfxAudio.currentTime = 0;
                 sfxAudio.volume = 1;
-            }).catch(e => console.log("Pre-play blocked: " + e));
+            }).catch(e => console.log("Audio unlock failed:", e));
 
             if (choiceNum === 1) {
-                document.getElementById('d-text').innerText = dialogueTexts.response1;
+                document.getElementById('d-text').innerHTML = dialogueTexts.response1;
             } else {
-                document.getElementById('d-text').innerText = dialogueTexts.response2;
+                document.getElementById('d-text').innerHTML = dialogueTexts.response2;
             }
 
             document.getElementById('inventory').style.opacity = '1';
-            setTimeout(spawnPearls, 2000); 
-        }
-
-        function spawnPearls() {
-            const positions = [
-                { top: '65%', left: '20%', delay: '0s' },
-                { top: '25%', left: '75%', delay: '1s' },
-                { top: '50%', left: '80%', delay: '2s' },
-                { top: '75%', left: '60%', delay: '0.5s' },
-                { top: '35%', left: '15%', delay: '1.5s' }
-            ];
-
-            const pearlsContainer = document.getElementById('pearls-container');
-
-            positions.forEach((pos, index) => {
-                const pearl = document.createElement('div');
-                pearl.classList.add('pearl');
-                pearl.style.top = pos.top;
-                pearl.style.left = pos.left;
-                pearl.style.animationDelay = pos.delay; 
-                
-                setTimeout(() => { pearl.style.opacity = '1'; }, index * 500);
-                pearl.onclick = () => collectPearl(pearl);
-                
-                pearlsContainer.appendChild(pearl);
-            });
             
-            setTimeout(() => { 
+            setTimeout(() => {
                 const dBox = document.getElementById('d-box');
                 dBox.style.opacity = '0'; 
-                setTimeout(() => dBox.style.display = 'none', 1000);
-            }, 3000);
+                setTimeout(() => {
+                    dBox.style.display = 'none';
+                    startSpawningPearls(); 
+                }, 1000);
+            }, 4500); 
+        }
+
+        function startSpawningPearls() {
+            pearlsActive = true;
+            for(let i=0; i<3; i++) {
+                setTimeout(spawnSinglePearl, i * 1500);
+            }
+        }
+
+        function spawnSinglePearl() {
+            if (!pearlsActive) return; 
+
+            const pearl = document.createElement('div');
+            pearl.classList.add('pearl');
+            
+            pearl.style.top = (Math.random() * 55 + 20) + '%'; 
+            pearl.style.left = (Math.random() * 70 + 15) + '%'; 
+            
+            document.getElementById('pearls-container').appendChild(pearl);
+            
+            setTimeout(() => { pearl.style.opacity = '1'; }, 100);
+            pearl.onclick = () => collectPearl(pearl);
         }
 
         function collectPearl(pearlElement) {
-            sfxAudio.currentTime = 0; 
-            sfxAudio.play().catch(e => console.log("Click sound blocked: " + e));
+            if (!pearlsActive) return; 
+            pearlElement.onclick = null; 
+
+            // ניגון בטוח שעובד גם במובייל
+            if (!sfxAudio.muted) {
+                sfxAudio.pause();
+                sfxAudio.currentTime = 0;
+                sfxAudio.play().catch(e => console.log("Play failed:", e));
+            }
 
             pearlElement.classList.add('collected'); 
             collectedPearls++;
-            document.getElementById('inventory').innerText = `פנינים: ${collectedPearls}/${totalPearls}`;
             
-            const newOpacity = Math.max(0, 0.85 - (collectedPearls * 0.17));
-            document.getElementById('darkness-overlay').style.opacity = newOpacity;
+            if (!isEndlessMode) {
+                document.getElementById('inventory').innerText = `פנינים: ${collectedPearls}/${phase1Pearls}`;
+                const newOpacity = Math.max(0, 0.85 - (collectedPearls * 0.085));
+                document.getElementById('darkness-overlay').style.opacity = newOpacity;
 
-            if (collectedPearls === totalPearls) {
-                setTimeout(transitionToScene2, 1000);
+                if (collectedPearls === phase1Pearls) {
+                    pearlsActive = false; 
+                    setTimeout(showPauseMenu, 1500); 
+                } else {
+                    setTimeout(spawnSinglePearl, 1000); 
+                }
+            } else {
+                document.getElementById('inventory').innerText = `פנינים: ${collectedPearls}`;
+                setTimeout(spawnSinglePearl, 1200); 
             }
+
+            setTimeout(() => pearlElement.remove(), 1500); 
+        } 
+
+        function showPauseMenu() {
+            document.querySelectorAll('.pearl').forEach(p => p.remove());
+
+            const dBox = document.getElementById('d-box');
+            dBox.style.display = 'flex';
+            setTimeout(() => dBox.style.opacity = '1', 100);
+
+            document.getElementById('d-text').innerHTML = dialogueTexts.pause;
+            document.getElementById('d-choices').innerHTML = `
+                <button class="choice-btn" onclick="continueEndless()">${dialogueTexts.continueBtn}</button>
+                <button class="choice-btn" onclick="transitionToScene2()">${dialogueTexts.endBtn}</button>
+            `;
+        }
+
+        function continueEndless() {
+            isEndlessMode = true;
+            document.getElementById('inventory').innerText = `פנינים: ${collectedPearls}`;
+            
+            const dBox = document.getElementById('d-box');
+            dBox.style.opacity = '0'; 
+            setTimeout(() => {
+                dBox.style.display = 'none';
+                startSpawningPearls(); 
+            }, 1000);
         }
 
         function transitionToScene2() {
@@ -1098,7 +1157,7 @@
         }
 
         function returnToDashboard() {
-            document.getElementById('game-dropdown').value = 'none'; // איפוס התפריט הנגלל
+            document.getElementById('game-dropdown').value = 'none';
             navigateTo('screen-dashboard');
         }
 
